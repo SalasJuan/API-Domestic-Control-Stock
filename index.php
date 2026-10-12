@@ -41,7 +41,7 @@ $url = $_SERVER["REQUEST_URI"];
 $url = explode("?", $url)[0];
 
 // Eliminamos el prefijo del proyecto
-$basePath = "controlStock-API";
+$basePath = "API-Domestic-Control-Stock";
 $url = str_replace($basePath, "", $url);
 
 try {
