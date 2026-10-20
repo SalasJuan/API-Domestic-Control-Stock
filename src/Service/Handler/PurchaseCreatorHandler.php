@@ -3,7 +3,9 @@
 namespace Src\Service\Handler;
 
 use DateTimeImmutable;
+
 use Throwable;
+use Src\Utils\Exception\ValidationException;
 
 use Src\Entity\PurchaseDetail\PurchaseDetail;
 
@@ -38,12 +40,8 @@ final class PurchaseCreatorHandler
             new PDOManager();
     }
 
-    public function create(
-        DateTimeImmutable $date,
-        string $store,
-        array $details
-    ): int {
-
+    public function create(DateTimeImmutable $date, string $store, array $details): int 
+    {
         $this->validateDetails($details);
 
         // Primero creamos los PurchaseDetail en memoria.
@@ -148,50 +146,49 @@ final class PurchaseCreatorHandler
     private function validateDetails(array $details): void
     {
         if (count($details) === 0) {
-
-            throw new \InvalidArgumentException(
-                "La compra debe contener al menos un detalle."
-            );
+            throw new ValidationException("La compra debe contener al menos un detalle.");
         }
 
-        foreach ($details as $detail) {
+    foreach ($details as $detail) {
+        if (!is_array($detail)) {
+            throw new ValidationException('Cada detalle de compra debe ser un objeto.');
+        }
 
-        //----------------------------------//
-        //-Validacion Estructura del Detail-//
-        //----------------------------------//
+        //-----------Validacion------------//
+        //----- Estructura del Detail -----//
+        //---------------------------------//
 
-            if (!isset(
-                $detail["product_id"],
-                $detail["quantity"],
-                $detail["unit_price"],
-                $detail["expiration_date"]
-            )) {
+        if (!isset(
+                $detail['product_id'],
+                $detail['quantity'],
+                $detail['unit_price'],
+                $detail['expiration_date']
+            )
+        ) {
+            throw new ValidationException('El detalle de compra está incompleto.');
+        }
 
-                throw new \InvalidArgumentException(
-                    "El detalle de compra está incompleto."
-                );
-            }
-        //---------------------//
-        //-Validacion de Datos-//
-        //---------------------//
+        //-----------Validacion-----------//
+        //--------Formato (Datos)--------//
+        //-------------------------------//
 
-            if ($detail["quantity"] <= 0) {
-
-                throw new \InvalidArgumentException(
-                    "La cantidad debe ser mayor a 0."
-                );
-            }
-
-            if (bccomp(
-                (string) $detail["unit_price"],
-                "0.00",
-                2
-            ) <= 0) {
-
-                throw new \InvalidArgumentException(
-                    "El precio unitario debe ser mayor a 0."
-                );
-            }
+        if (
+            filter_var(
+                $detail['product_id'],
+                FILTER_VALIDATE_INT
+            ) === false
+            || filter_var(
+                $detail['quantity'],
+                FILTER_VALIDATE_INT
+            ) === false
+            || !is_string($detail['expiration_date'])
+            || trim($detail['expiration_date']) === ''
+            || !is_scalar($detail['unit_price'])
+        ) {
+            throw new ValidationException(
+                'Los datos del detalle de compra tienen un formato inválido.'
+            );
+        }
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 use Src\Utils\Exception\ApiException;
 use Src\Utils\Exception\ResourceNotFoundException;
+use Src\Utils\Exception\InvalidDomainValueException;
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
@@ -58,10 +59,16 @@ try {
     if ($e instanceof ApiException) {
         $status = $e->statusCode();
         $message = $e->getMessage();
+
     } elseif ($e instanceof ResourceNotFoundException){
         $status = 404;
         $message = $e->getMessage();
-    } elseif ($e instanceof PDOException && $e->getCode() === '23000'){
+
+    } elseif ($e instanceof InvalidDomainValueException) {
+        $status = 422;
+        $message = $e->getMessage();
+        
+    }  elseif ($e instanceof PDOException && $e->getCode() === '23000'){
         $status = 409;
         $message = 'La operación entra en conflicto con los datos existentes o con una relación de la base de datos.';
     }

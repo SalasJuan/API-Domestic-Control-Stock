@@ -17,11 +17,19 @@ final class Lot {
 
     public static function create(int $purchase_detail_id, int $product_id, int $quantity, DateTimeImmutable $purchase_date, DateTimeImmutable $expiration_date): self
     {
+        self::validateIds($purchase_detail_id, $product_id);
+        self::validateQuantity($quantity);
+        self::validateDates($purchase_date, $expiration_date);
+
         return new self(null, $purchase_detail_id, $product_id, $quantity, $purchase_date, $expiration_date, false);
     }
 
     public function modify(int $purchase_detail_id, int $product_id, int $quantity, DateTimeImmutable $purchase_date, DateTimeImmutable $expiration_date): void
     {
+        self::validateIds($purchase_detail_id, $product_id);
+        self::validateQuantity($quantity);
+        self::validateDates($purchase_date, $expiration_date);
+
         $this->purchase_detail_id = $purchase_detail_id;
         $this->product_id = $product_id;
         $this->quantity = $quantity;
@@ -29,6 +37,35 @@ final class Lot {
         $this->expiration_date = $expiration_date;
     }
     
+
+    private static function validateIds(int $purchase_detail_id, int $product_id): void
+    {
+        if ($purchase_detail_id <= 0 || $product_id <= 0) {
+            throw new \InvalidArgumentException(
+                'Los IDs del detalle de compra y del producto deben ser mayores a 0.'
+            );
+        }
+    }
+
+    private static function validateQuantity(int $quantity): void
+    {
+        if ($quantity <= 0) {
+            throw new InvalidLotQuantityException($quantity);
+        }
+    }
+
+    private static function validateDates(DateTimeImmutable $purchase_date, DateTimeImmutable $expiration_date): void
+    {
+        $today = new DateTimeImmutable('today');
+
+        if (
+            $expiration_date->format('Y-m-d') < $purchase_date->format('Y-m-d')
+            || $expiration_date->format('Y-m-d') < $today->format('Y-m-d')
+        ) {
+            throw new InvalidLotExpirationDateException();
+        }
+    }
+
     public function id(): ?int
     {
         return $this->id;
@@ -61,10 +98,15 @@ final class Lot {
 
     public function updateQuantity(int $quantity): void
     {
+        self::validateQuantity($quantity);
         $this->quantity = $quantity;
     }
     public function updateProduct(int $product_id): void
     {
+            if ($product_id <= 0) {
+                throw new \InvalidArgumentException(
+                'El ID del producto debe ser mayor a 0.'
+            );}
         $this->product_id = $product_id;
     }
     
