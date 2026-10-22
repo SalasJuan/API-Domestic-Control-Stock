@@ -27,6 +27,10 @@ final class Purchase {
 
     public function modify(DateTimeImmutable $date, string $store, string $total): void
     {
+        self::validateDate($date);
+        self::validateStore($store);
+        self::validateTotal($total);
+        
         $this->date = $date;
         $this->store = trim($store);
         $this->total = $total;

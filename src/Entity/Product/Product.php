@@ -2,6 +2,11 @@
 
 namespace Src\Entity\Product;
 
+use Src\Entity\Product\Exception\InvalidProductNameException;
+use Src\Entity\Product\Exception\InvalidProductBrandIdException;
+use Src\Entity\Product\Exception\InvalidProductCategoryIdException;
+use Src\Entity\Product\Exception\InvalidProductMinimumStockException;
+
 final class Product {
     public function __construct(
         private readonly ?int $id,
@@ -14,19 +19,54 @@ final class Product {
 
     public static function create(string $name, string $brand_id, string $category_id, int $minimum_stock): self
     {
-        return new self(null, $name, $brand_id, $category_id, $minimum_stock, false);
+        self::validateName($name);
+        self::validateBrandId($brand_id);
+        self::validateCategoryId($category_id);
+        self::validateMinimumStock($minimum_stock);
+
+        return new self(null, trim($name), $brand_id, $category_id, $minimum_stock, false);
         // 'Self' indica Instancia de el mismo Objeto (Product)
     }
 
-//Modify es un setter para todos los Atributos 
-//Funcion Utilizada por 'UPDATE'
     public function modify(string $name, string $brand_id, string $category_id, int $minimum_stock): void
     {
-        $this->name = $name;
+        self::validateName($name);
+        self::validateBrandId($brand_id);
+        self::validateCategoryId($category_id);
+        self::validateMinimumStock($minimum_stock);
+
+        $this->name = trim($name);
         $this->brand_id = $brand_id;
         $this->category_id = $category_id;
         $this->minimum_stock = $minimum_stock;
     }
+
+
+    private static function validateName($name)
+    {
+        if (trim($name) === '') {
+            throw new InvalidProductNameException();
+        }  
+    }
+    private static function validateBrandId(int $brand_id): void
+    {  
+        if ($brand_id <= 0) {
+            throw new InvalidProductBrandIdException();
+        }
+    }
+    private static function validateCategoryId(int $category_id): void
+    {  
+        if ($category_id <= 0) {
+            throw new InvalidProductCategoryIdException();
+        }
+    }
+    private static function validateMinimumStock(int $minimum_stock): void
+    {  
+        if ($minimum_stock < 0) {
+            throw new InvalidProductMinimumStockException();
+        }
+    }
+
 
     public function id(): ?int
     {
