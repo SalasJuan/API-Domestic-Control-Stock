@@ -3,6 +3,9 @@
 namespace Src\Entity\Lot;
 use DateTimeImmutable;
 
+use Src\Entity\Lot\Exception\InvalidLotQuantityException;
+use Src\Entity\Lot\Exception\InvalidLotExpirationDateException;
+
 final class Lot {
 
     public function __construct(

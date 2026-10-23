@@ -4,6 +4,7 @@
 !/**/data/apache/logs/.gitkeep
 
 /vendor/
+/.phpunit.cache/
 composer.phar
 .vscode
 .env
