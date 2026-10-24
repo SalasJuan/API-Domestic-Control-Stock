@@ -2,6 +2,11 @@
 
 namespace Src\Entity\PurchaseDetail;
 
+use Src\Entity\PurchaseDetail\Exception\InvalidPurchaseDetailProductIdException;
+use Src\Entity\PurchaseDetail\Exception\InvalidPurchaseDetailPurchaseIdException;
+use Src\Entity\PurchaseDetail\Exception\InvalidPurchaseDetailQuantityException;
+use Src\Entity\PurchaseDetail\Exception\InvalidPurchaseDetailUnitPriceException;
+
 final class PurchaseDetail {
     public function __construct(
         private readonly ?int $id,
@@ -12,32 +17,63 @@ final class PurchaseDetail {
         private string $subtotal,
         private bool $deleted
         ){}
-//SubTotal es un Atributo Calculado el User no Modifica Directamente
+//SubTotal es un Atributo Calculado no se debe Modificar Directamente
 
     public static function create(int $product_id, int $quantity, string $unit_price): self 
     {
-        $subtotal = bcmul((string) $quantity, $unit_price,2);
+        self::validateProductId($product_id);
+        self::validateQuantity($quantity);
+        self::validateUnitPrice($unit_price);
+        $subtotal = bcmul((string) $quantity, $unit_price, 2);
+        
         return new self(null, null, $product_id, $quantity, $unit_price, $subtotal, false);
     }
 
-    public function modify(int $product_id, int $quantity, string $unit_price): void
+    public function modify(int $product_id, int $quantity, string $unit_price): void 
     {
+        self::validateProductId($product_id);
+        self::validateQuantity($quantity);
+        self::validateUnitPrice($unit_price);
+
+        // Modificar solo después de validar todos los datos.
         $this->product_id = $product_id;
         $this->quantity = $quantity;
         $this->unit_price = $unit_price;
-        $this->subtotal = bcmul((string) $quantity, $unit_price,2);
-        //Recalcular SubTotal en cada Modify
+        $this->subtotal = bcmul((string) $quantity, $unit_price, 2);
+    }
+
+
+    private static function validateProductId(int $product_id): void
+    {
+        if ($product_id <= 0) {
+            throw new InvalidPurchaseDetailProductIdException($product_id);
+        }
+    }
+
+    private static function validateQuantity(int $quantity): void
+    {
+        if ($quantity <= 0) {
+            throw new InvalidPurchaseDetailQuantityException($quantity);
+        }
+    }
+
+    private static function validateUnitPrice(string $unit_price): void
+    {
+        // Admite enteros o decimales con hasta dos cifras decimales.
+        if (
+            preg_match('/^\d+(?:\.\d{1,2})?$/D', $unit_price) !== 1
+        ) {
+            throw new InvalidPurchaseDetailUnitPriceException();
+        }
     }
 
     public function assignPurchase(int $purchase_id): void
     {
         if ($purchase_id <= 0) {
-        throw new \InvalidArgumentException(
-            "El ID de la compra debe ser mayor a 0."
-        );
+            throw new InvalidPurchaseDetailPurchaseIdException($purchase_id);
         }
         
-    $this->purchase_id = $purchase_id;
+        $this->purchase_id = $purchase_id;
     }
 
     public function id(): ?int
