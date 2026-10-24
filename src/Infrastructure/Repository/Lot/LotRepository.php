@@ -81,6 +81,34 @@ final readonly class LotRepository extends PDOManager implements LotRepositoryIn
         $this->execute($query, $parameters);
     }
 
+    /** @return Lot[] */
+    public function searchByProduct(int $product_id): array
+    {
+        $query = <<<SEARCH_LOT_BY_PRODUCT
+                        SELECT
+                            *
+                        FROM
+                            Lots L
+                        WHERE
+                            L.product_id = :product_id
+                        AND
+                            L.deleted = 0
+                    SEARCH_LOT_BY_PRODUCT;
+
+        $parameters = [
+            "product_id" => $product_id
+        ];
+
+        $results = $this->execute($query, $parameters);
+
+        $lots = [];
+        foreach($results as $result) {
+            $lots[] = $this->toLot($result);
+        }
+        
+        return $lots;
+    }
+
     public function findByPurchaseDetail(int $purchase_detail_id): ?Lot
     {
         $query = <<<FIND_LOT_BY_PURCHASE_DETAIL

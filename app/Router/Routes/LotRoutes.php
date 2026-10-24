@@ -22,6 +22,18 @@ final readonly class LotRoutes {
         "method" => "GET"
       ],
       [
+        "name" => "lots_getByProduct",
+        "url" => "/lotsByProduct",
+        "controller" => "Lot/LotsGetByProductController.php",
+        "method" => "GET",
+        "parameters" => [
+          [
+            "name" => "product_id",
+            "type" => "int"
+          ]
+        ]
+      ],
+      [
         "name" => "lot_post",
         "url" => "/lots",
         "controller" => "Lot/LotPostController.php",

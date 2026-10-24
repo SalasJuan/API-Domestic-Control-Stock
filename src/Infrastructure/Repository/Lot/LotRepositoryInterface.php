@@ -15,6 +15,9 @@ interface LotRepositoryInterface {
 
     public function update(Lot $lot): void;
 
+    /** @return Lot[] */
+    public function searchByProduct(int $product_id): array;
+
     public function findByPurchaseDetail(int $purchase_detail_id): ?Lot;
 
     public function findDeletedByPurchaseDetail(int $purchase_detail_id): ?Lot;
