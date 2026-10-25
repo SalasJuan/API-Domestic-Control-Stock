@@ -24,6 +24,7 @@ $dotenv->load();
 spl_autoload_register(
     function ($class): void {
         Autoloader::register($class, [
+            "src/Controller",
             "src/Service",
             "src/Entity",
             "src/Infrastructure",
@@ -68,16 +69,26 @@ try {
         $status = 422;
         $message = $e->getMessage();
         
-    }  elseif ($e instanceof PDOException && $e->getCode() === '23000'){
-        $status = 409;
-        $message = 'La operación entra en conflicto con los datos existentes o con una relación de la base de datos.';
+    } 
+    //--Develop--//
+    if (($_ENV['APP_ENV'] ?? 'production') === 'development') {
+        $message = $e->getMessage();
     }
 
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
 
-    echo json_encode([
+    $response = [
         'status' => $status,
         'message' => $message
-    ], JSON_UNESCAPED_UNICODE);
+    ];
+
+    if (($_ENV['APP_ENV'] ?? 'production') === 'development') {
+        $response['exception'] = get_class($e);
+        $response['file'] = $e->getFile();
+        $response['line'] = $e->getLine();
+        //$response['trace'] = $e->getTraceAsString();
+    }
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }

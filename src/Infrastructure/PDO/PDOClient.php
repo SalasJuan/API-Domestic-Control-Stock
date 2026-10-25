@@ -29,7 +29,6 @@ final class PDOClient {
 
     private function connectClient(): PDO
     {
-        try {
             $conn = new PDO(
                 $this->generateUrl(),
                 $_ENV['DATABASE_USER'],
@@ -41,10 +40,6 @@ final class PDOClient {
             self::$activeClients[$_ENV['DATABASE_USER']] = $conn;
 
             return $conn;
-        } catch (PDOException $e) {
-            echo "Hubo un error en la base de datos ".$e->getMessage();
-            exit();
-        }
     }
 
     private function generateUrl(): string

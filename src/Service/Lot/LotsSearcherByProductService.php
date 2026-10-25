@@ -18,7 +18,6 @@ final readonly class LotsSearcherByProductService
     /** @return Lot[] */
     public function searchByProduct(int $product_id): array
     {
-        var_dump($product_id);
         return $this->repository->searchByProduct($product_id);
     }
 }

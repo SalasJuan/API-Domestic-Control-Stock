@@ -2,9 +2,10 @@
 
 namespace Src\Utils\Exception;
 
-use RuntimeException;
-
-abstract class ResourceNotFoundException extends RuntimeException
+abstract class ResourceNotFoundException extends ApiException
 {
-    
+    public function __construct(string $message)
+    {
+        parent::__construct($message, 404);
+    }
 }

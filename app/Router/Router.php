@@ -2,6 +2,7 @@
 
 include_once "Route.php";
 use Src\Utils\Exception\RouteNotFoundException;
+use Src\Utils\Exception\ControllerNotFoundException;
 
 final readonly class Router
 {
@@ -24,14 +25,33 @@ final readonly class Router
         if ($route === null) {
             throw new RouteNotFoundException();
         }
-        // Cargamos el archivo correspondiente al controlador
-        require_once __DIR__.'/../../src/Controller/'.$route->controller();
 
-        // Obtenemos los parametros
+    //-- Controller--//
+        $controllerFile = __DIR__. '/../../src/Controller/'. $route->controller();
+        if (!is_file($controllerFile)) {
+            throw new ControllerNotFoundException(
+                $route->controller()
+            );
+        }
+        // Cargamos el archivo correspondiente al controlador
+        require_once $controllerFile;
+
         $parameters = $this->getParameters($route, $url);
 
+        $className = $route->className();
+        if (!class_exists($className)) {
+            throw new ControllerNotFoundException(
+                $className
+            );
+        }
+
+        if (!(new ReflectionClass($className))->isInstantiable()) {
+            throw new ControllerNotFoundException(
+                $className
+            );
+        }
         // Instanciamos el controllador
-        $controller = new ($route->className())();
+        $controller = new $className();
         // Llamamos a la funcion principal del controlador
         $controller->start(...$parameters);
     }
