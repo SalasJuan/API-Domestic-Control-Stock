@@ -34,6 +34,18 @@ final readonly class LotRoutes {
         ]
       ],
       [
+        "name" => "lots_getExpired",
+        "url" => "/lotsExpired",
+        "controller" => "Lot/LotsGetExpiredController.php",
+        "method" => "GET"
+      ],
+      [
+        "name" => "lots_getExpiredSoon",
+        "url" => "/lotsExpiringSoon",
+        "controller" => "Lot/LotsGetExpiringSoonController.php",
+        "method" => "GET",
+      ],
+      [
         "name" => "lot_post",
         "url" => "/lots",
         "controller" => "Lot/LotPostController.php",

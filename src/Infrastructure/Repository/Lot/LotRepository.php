@@ -155,6 +155,63 @@ final readonly class LotRepository extends PDOManager implements LotRepositoryIn
         return $this->toLot($result[0] ?? null);
     }
 
+//----ALERTS----//
+    /** @return Lot[] */
+    public function searchExpiringSoon(): array
+    {
+        $query = <<<SEARCH_EXPIRING_SOON
+            SELECT
+                *
+            FROM
+                Lots L
+            WHERE
+                L.deleted = 0
+            AND
+                L.expiration_date > CURDATE()
+            AND
+                L.expiration_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            ORDER BY
+                L.expiration_date ASC
+        SEARCH_EXPIRING_SOON;
+
+        $results = $this->execute($query);
+
+        $lots = [];
+
+        foreach ($results as $result) {
+            $lots[] = $this->toLot($result);
+        }
+
+        return $lots;
+    }
+
+    /** @return Lot[] */
+    public function searchExpired(): array
+    {
+        $query = <<<SEARCH_EXPIRED
+            SELECT
+                *
+            FROM
+                Lots L
+            WHERE
+                L.deleted = 0
+            AND
+                L.expiration_date <= CURDATE()
+            ORDER BY
+                L.expiration_date ASC
+        SEARCH_EXPIRED;
+
+        $results = $this->execute($query);
+
+        $lots = [];
+
+        foreach ($results as $result) {
+            $lots[] = $this->toLot($result);
+        }
+
+        return $lots;
+    }
+    
     public function insert(Lot $lot): void
     {
         $query = "INSERT INTO Lots (purchase_detail_id, product_id, quantity, purchase_date, expiration_date, deleted) VALUES (:purchase_detail_id, :product_id, :quantity, :purchase_date, :expiration_date, :deleted) ";

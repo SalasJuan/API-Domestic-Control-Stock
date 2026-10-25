@@ -21,4 +21,10 @@ interface LotRepositoryInterface {
     public function findByPurchaseDetail(int $purchase_detail_id): ?Lot;
 
     public function findDeletedByPurchaseDetail(int $purchase_detail_id): ?Lot;
+
+    /** @return Lot[] */
+    public function searchExpired(): array;
+
+    /** @return Lot[] */
+    public function searchExpiringSoon(): array;
 }
