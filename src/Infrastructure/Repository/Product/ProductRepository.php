@@ -78,6 +78,45 @@ final readonly class ProductRepository extends PDOManager implements ProductRepo
         $this->execute($query, $parameters);
     }
 
+    /** @return <int, array{ id, name, minimum_stock, available_stock, stock_status}> **/
+    public function searchStockAlert(): array
+    {
+        $query = <<<SEARCH_STOCK_ALERT
+                    SELECT
+                        P.id,
+                        P.name,
+                        P.minimum_stock,
+                        COALESCE(SUM(L.quantity), 0) AS available_stock,
+                        CASE
+                            WHEN COALESCE(SUM(L.quantity), 0) = 0
+                                THEN 'OUT_OF_STOCK'
+                            ELSE 'LOW_STOCK'
+                        END AS stock_status
+                    FROM
+                        Products P
+                    LEFT JOIN
+                        Lots L
+                            ON L.product_id = P.id
+                            AND L.deleted = 0
+                            AND L.expiration_date > CURDATE()
+                    WHERE
+                        P.deleted = 0
+                    AND
+                        P.minimum_stock > 0
+                    GROUP BY
+                        P.id,
+                        P.name,
+                        P.minimum_stock
+                    HAVING
+                        COALESCE(SUM(L.quantity), 0) = 0
+                        OR COALESCE(SUM(L.quantity), 0) < P.minimum_stock
+                    ORDER BY
+                        available_stock ASC,
+                        P.name ASC
+                    SEARCH_STOCK_ALERT;
+
+        return $this->execute($query);
+    }
 
     public function insert(Product $product): void
     {

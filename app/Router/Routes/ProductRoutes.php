@@ -22,6 +22,12 @@ final readonly class ProductRoutes {
         "method" => "GET"
       ],
       [
+        "name" => "products_get_StockAlert",
+        "url" => "/productsStockAlert",
+        "controller" => "Product/ProductsGetStockAlertController.php",
+        "method" => "GET"
+      ],
+      [
         "name" => "product_post",
         "url" => "/products",
         "controller" => "Product/ProductPostController.php",

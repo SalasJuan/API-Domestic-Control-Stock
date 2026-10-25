@@ -15,4 +15,6 @@ interface ProductRepositoryInterface {
 
     public function update(Product $product): void;
 
+    /** @return <int, array{ id, name, minimum_stock, available_stock, stock_status}> **/
+    public function searchStockAlert(): array;
 }
